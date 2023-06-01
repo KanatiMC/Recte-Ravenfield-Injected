@@ -1,22 +1,24 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Remoting;
-using JetBrains.Annotations;
 using MapMagic;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.UI;
-using UnityEngine.UIElements.Experimental;
-using static System.Net.Mime.MediaTypeNames;
-using static UnityEngine.GridBrushBase;
 
 namespace Recte_Ravenfield
 {
     public class RecteManager : MonoBehaviour
     {
+
+        /*
+         * TO-DO List
+         * 
+         * 1. Add Keycodes
+         * 2. Add Teleporting
+         * 3. Add Players Menu
+         * 4. Add Coloring Menu
+         * 5. Add Different Health Bar Locations
+         * 6. Fix Aimbot
+         * */
         public void Update()
         {
             try
@@ -235,15 +237,7 @@ namespace Recte_Ravenfield
         public static Texture DefaultTexture;
         public static Shader DefaultShader;
 
-        /*public override void OnApplicationStart()
-        {
-            redTexture = new Texture2D(2, 2, TextureFormat.ARGB32, false);
-            redTexture.SetPixel(0, 0, Color.red);
-            redTexture.SetPixel(1, 0, Color.red);
-            redTexture.SetPixel(0, 1, Color.red);
-            redTexture.SetPixel(1, 1, Color.red);
-            redTexture.Apply();
-        }*/
+        
 
 
         private void Chams()
@@ -424,13 +418,12 @@ namespace Recte_Ravenfield
                             Vector3 vector = Camera.main.WorldToScreenPoint(
                                 actor.transform.position
                             );
+                            float dis = Mathf.Round(Vector3.Distance(actor.Position(), player.Position()));
                             if (!actor.dead)
                             {
                                 if (vector.z > 0f)
                                 {
-                                    string str = string.Format(
-                                        $"User: {actor.name}\nHP: {Mathf.Round(actor.health)}/{actor.maxHealth}"
-                                    );
+                                    
                                     if (PlayerPrefsX.GetBool("BoxESP"))
                                     {
                                         /*
@@ -452,27 +445,14 @@ namespace Recte_Ravenfield
                                     }
                                     if (actor.team == 0 && PlayerPrefsX.GetBool("TeamESP"))
                                     {
-                                        RecteUtils.DrawString(
-                                            new Vector2(
-                                                vector.x - 5f,
-                                                (float)Screen.height - vector.y
-                                            ),
-                                            str,
-                                            RecteUtils.GetColorFromString("009666"),
-                                            true
-                                        );
+                                        RecteUtils.DrawString(new Vector2(vector.x - 5f, (float)Screen.height - vector.y), $"<b><color=#009666>{actor.name}\nHP: {Mathf.Round(actor.health)}/{actor.maxHealth}\n[{dis}m]</color></b>", true);
+                                        
+                                        
                                         
                                     }
                                     if (actor.team == 1 && PlayerPrefsX.GetBool("EnemyESP"))
                                     {
-                                        RecteUtils.DrawString(
-                                            new Vector2(
-                                                vector.x - 5f,
-                                                (float)Screen.height - vector.y
-                                            ),
-                                            str,
-                                            RecteUtils.GetColorFromString("937cf2")
-                                        ) ;
+                                        RecteUtils.DrawString(new Vector2(vector.x - 5f, (float)Screen.height - vector.y), $"<b><color=#937cf2>{actor.name}\nHP: {Mathf.Round(actor.health)}/{actor.maxHealth}\n[{dis}m]</color></b>", true);
                                     }
                                 }
                             }
@@ -493,7 +473,269 @@ namespace Recte_Ravenfield
         private Camera main = Camera.main;
 
         private GameObject closestObject;
-
+        public void RenderMenu()
+        {
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("FPSCounter")
+                && GUILayout.Button(
+                    "FPS Display: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("FPSCounter", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("FPSCounter")
+                && GUILayout.Button(
+                    "FPS Display: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("FPSCounter", false);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("Crosshair")
+                && GUILayout.Button(
+                    "Crosshair: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Crosshair", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("Crosshair")
+                && GUILayout.Button(
+                    "Crosshair: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Crosshair", false);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                PlayerPrefs.GetInt("CrosshairMode") == 0
+                && GUILayout.Button(
+                    "Crosshair Mode: Normal",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefs.SetInt("CrosshairMode", 1);
+            }
+            if (
+                PlayerPrefs.GetInt("CrosshairMode") == 1
+                && GUILayout.Button(
+                    "Crosshair Mode: Diagonal",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefs.SetInt("CrosshairMode", 0);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("CoordsDisplay")
+                && GUILayout.Button(
+                    "Coordinates: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("CoordsDisplay", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("CoordsDisplay")
+                && GUILayout.Button(
+                    "Coordinates: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("CoordsDisplay", false);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("Chams")
+                && GUILayout.Button(
+                    "Chams: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Chams", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("Chams")
+                && GUILayout.Button(
+                    "Chams: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Chams", false);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("Tracers")
+                && GUILayout.Button(
+                    "Tracers: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Tracers", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("Tracers")
+                && GUILayout.Button(
+                    "Tracers: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Tracers", false);
+            }
+            GUILayout.EndHorizontal();
+            if (PlayerPrefsX.GetBool("Tracers"))
+            {
+                if (PlayerPrefs.GetInt("TracerLoc") == 0 && GUILayout.Button("Tracer Location: Center", new GUILayoutOption[] { GUILayout.Height(35f) }))
+                {
+                    PlayerPrefs.SetInt("TracerLoc", 1);
+                }
+                if (PlayerPrefs.GetInt("TracerLoc") == 1 && GUILayout.Button("Tracer Location: Top", new GUILayoutOption[] { GUILayout.Height(35f) }))
+                {
+                    PlayerPrefs.SetInt("TracerLoc", 2);
+                }
+                if (PlayerPrefs.GetInt("TracerLoc") == 2 && GUILayout.Button("Tracer Location: Bottom", new GUILayoutOption[] { GUILayout.Height(35f) }))
+                {
+                    PlayerPrefs.SetInt("TracerLoc", 0);
+                }
+            }
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("Skeleton")
+                && GUILayout.Button(
+                    "Skeleton: <color=red>Disabled</color> (WIP)",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Skeleton", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("Skeleton")
+                && GUILayout.Button(
+                    "Skeleton: <color=lime>Enabled</color>(WIP)",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Skeleton", false);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("BoxESP")
+                && GUILayout.Button(
+                    "BoxESP: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("BoxESP", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("BoxESP")
+                && GUILayout.Button(
+                    "BoxESP: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("BoxESP", false);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("ESP")
+                && GUILayout.Button(
+                    "ESP: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("ESP", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("ESP")
+                && GUILayout.Button(
+                    "ESP: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("ESP", false);
+            }
+            GUILayout.EndHorizontal();
+            if (PlayerPrefsX.GetBool("ESP"))
+            {
+                GUILayout.BeginHorizontal();
+                if (
+                    !PlayerPrefsX.GetBool("TeamESP")
+                    && GUILayout.Button(
+                        "Team ESP: <color=red>Disabled</color>",
+                        new GUILayoutOption[] { GUILayout.Height(35f) }
+                    )
+                )
+                {
+                    PlayerPrefsX.SetBool("TeamESP", true);
+                }
+                if (
+                    PlayerPrefsX.GetBool("TeamESP")
+                    && GUILayout.Button(
+                        "Team ESP: <color=lime>Enabled</color>",
+                        new GUILayoutOption[] { GUILayout.Height(35f) }
+                    )
+                )
+                {
+                    PlayerPrefsX.SetBool("TeamESP", false);
+                }
+                GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal();
+                if (
+                    !PlayerPrefsX.GetBool("EnemyESP")
+                    && GUILayout.Button(
+                        "Enemy ESP: <color=red>Disabled</color>",
+                        new GUILayoutOption[] { GUILayout.Height(35f) }
+                    )
+                )
+                {
+                    PlayerPrefsX.SetBool("EnemyESP", true);
+                }
+                if (
+                    PlayerPrefsX.GetBool("EnemyESP")
+                    && GUILayout.Button(
+                        "Enemy ESP: <color=lime>Enabled</color>",
+                        new GUILayoutOption[] { GUILayout.Height(35f) }
+                    )
+                )
+                {
+                    PlayerPrefsX.SetBool("EnemyESP", false);
+                }
+                GUILayout.EndHorizontal();
+            }
+        }
         public void Aimbot()
         {
             Vector3 mp = new Vector3((float)Screen.width / 2f, (float)Screen.height / 2f);
@@ -581,7 +823,305 @@ namespace Recte_Ravenfield
 
         private ActorManager am;
         private Actor player;
+        public void playerMenu()
+        {
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("Invincible")
+                && GUILayout.Button(
+                    "Invincible: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Invincible", true);
+                this.player.SetHealth(float.MaxValue);
+            }
+            if (
+                PlayerPrefsX.GetBool("Invincible")
+                && GUILayout.Button(
+                    "Invincible: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Invincible", false);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("Speed")
+                && GUILayout.Button(
+                    "Speed Multiplier: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Speed", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("Speed")
+                && GUILayout.Button(
+                    "Speed Multiplier: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Speed", false);
+            }
+            GUILayout.EndHorizontal();
 
+            if (PlayerPrefsX.GetBool("Speed"))
+            {
+                GUILayout.Label(
+                    "Speed Multiplier: " + PlayerPrefs.GetFloat("SpeedMultiply")
+                );
+                PlayerPrefs.SetFloat(
+                    "SpeedMultiply",
+                    GUILayout.HorizontalSlider(
+                        Mathf.Round(PlayerPrefs.GetFloat("SpeedMultiply")),
+                        1f,
+                        10f,
+                        new GUILayoutOption[0]
+                    )
+                );
+            }
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("X: ");
+            PlayerPrefs.SetString("TeleportX", GUILayout.TextField(PlayerPrefs.GetString("TeleportX"), new GUILayoutOption[0]));
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Y: ");
+            PlayerPrefs.SetString("TeleportY", GUILayout.TextField(PlayerPrefs.GetString("TeleportY"), new GUILayoutOption[0]));
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Z: ");
+            PlayerPrefs.SetString("TeleportZ", GUILayout.TextField(PlayerPrefs.GetString("TeleportZ"), new GUILayoutOption[0]));
+            GUILayout.EndHorizontal();
+            if (GUILayout.Button("Teleport To Coords", new GUILayoutOption[0]))
+            {
+                this.player.SetPositionAndRotation(new Vector3(float.Parse(PlayerPrefs.GetString("TeleportX")), float.Parse(PlayerPrefs.GetString("TeleportY")), float.Parse(PlayerPrefs.GetString("TeleportZ"))), player.transform.rotation);
+                //this.player.transform.position = new Vector3(float.Parse(PlayerPrefs.GetString("TeleportX")), float.Parse(PlayerPrefs.GetString("TeleportY")), float.Parse(PlayerPrefs.GetString("TeleportZ")));
+            }
+        }
+        public void weaponMenu()
+        {
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("InfiniteAmmo")
+                && GUILayout.Button(
+                    "Infinite Ammo: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("InfiniteAmmo", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("InfiniteAmmo")
+                && GUILayout.Button(
+                    "Infinite Ammo: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("InfiniteAmmo", false);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("NoRecoil")
+                && GUILayout.Button(
+                    "NoRecoil: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("NoRecoil", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("NoRecoil")
+                && GUILayout.Button(
+                    "NoRecoil: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("NoRecoil", false);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("NoSpread")
+                && GUILayout.Button(
+                    "NoSpread: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("NoSpread", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("NoSpread")
+                && GUILayout.Button(
+                    "NoSpread: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("NoSpread", false);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("RapidFire")
+                && GUILayout.Button(
+                    "Rapid Fire: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("RapidFire", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("RapidFire")
+                && GUILayout.Button(
+                    "Rapid Fire: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("RapidFire", false);
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (
+                !PlayerPrefsX.GetBool("Aimbot")
+                && GUILayout.Button(
+                    "Aimbot: <color=red>Disabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Aimbot", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("Aimbot")
+                && GUILayout.Button(
+                    "Aimbot: <color=lime>Enabled</color>",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("Aimbot", false);
+            }
+            GUILayout.EndHorizontal();
+            if (PlayerPrefsX.GetBool("Aimbot"))
+            {
+                GUILayout.Label(
+                    "Aim Offset: " + PlayerPrefs.GetFloat("AimOffset").ToString()
+                );
+                PlayerPrefs.SetFloat(
+                    "AimOffset",
+                    GUILayout.HorizontalSlider(
+                        float.Parse(Math.Round((double)PlayerPrefs.GetFloat("AimOffset", 0.1f), 2).ToString()),
+                        0f,
+                        4f,
+                        new GUILayoutOption[0]
+                    )
+                );
+                GUILayout.BeginHorizontal();
+                if (
+                    !PlayerPrefsX.GetBool("aimFOV")
+                    && GUILayout.Button(
+                        "FOV Circle: <color=red>Disabled</color>",
+                        new GUILayoutOption[] { GUILayout.Height(35f) }
+                    )
+                )
+                {
+                    PlayerPrefsX.SetBool("aimFOV", true);
+                }
+                if (
+                    PlayerPrefsX.GetBool("aimFOV")
+                    && GUILayout.Button(
+                        "FOV Circle: <color=lime>Enabled</color>",
+                        new GUILayoutOption[] { GUILayout.Height(35f) }
+                    )
+                )
+                {
+                    PlayerPrefsX.SetBool("aimFOV", false);
+                }
+                GUILayout.EndHorizontal();
+                GUILayout.Label(
+                    "FOV Size: " + PlayerPrefs.GetFloat("fovSize").ToString()
+                );
+                PlayerPrefs.SetFloat(
+                    "fovSize",
+                    GUILayout.HorizontalSlider(
+                        Mathf.Round(PlayerPrefs.GetFloat("fovSize", 10f)),
+                        5f,
+                        100f,
+                        new GUILayoutOption[0]
+                    )
+                );
+
+            }
+        }
+        public Vector2 scrollPos;
+        public void playerList()
+        {
+            this.scrollPos = GUILayout.BeginScrollView(this.scrollPos, new GUILayoutOption[]
+        {
+            GUILayout.Height(500f)
+        });
+            GUILayout.Label("Player Team");
+            
+            foreach (Actor a in ActorManager.instance.actors)
+            {
+                if (a != null)
+                {
+
+                    if (a.team == 0)
+                    {
+                        GUILayout.Button("<b><color=blue>" + a.name + "</color></b>", new GUILayoutOption[] { GUILayout.Height(25f) });
+                        GUILayout.BeginHorizontal();
+                        if (GUILayout.Button("<b><color=red>Kill</color></b>", new GUILayoutOption[] { GUILayout.Height(25f) }))
+                        {
+                            a.Kill(DamageInfo.Default);
+                        }
+                        if (GUILayout.Button("Teleport", new GUILayoutOption[] { GUILayout.Height(25f) }))
+                        {
+                            this.player.SetPositionAndRotation(a.transform.position + a.transform.up * 2f, player.transform.rotation);
+                        }
+                        GUILayout.EndHorizontal();
+                    }
+                }
+            }
+            GUILayout.Label("Enemy Team");
+            foreach (Actor a in ActorManager.instance.actors)
+            {
+                if (a != null)
+                {
+
+                    if (a.team == 1)
+                    {
+                        GUILayout.Button("<b><color=red>" + a.name + "</color></b>", new GUILayoutOption[] { GUILayout.Height(25f) });
+                        GUILayout.BeginHorizontal();
+                        if (GUILayout.Button("<b><color=red>Kill</color></b>", new GUILayoutOption[] { GUILayout.Height(25f) }))
+                        {
+                            a.Kill(DamageInfo.Default);
+                        }
+                        if (GUILayout.Button("Teleport", new GUILayoutOption[] { GUILayout.Height(25f) }))
+                        {
+                            this.player.SetPositionAndRotation(a.transform.position + a.transform.up * 2f, player.transform.rotation);
+                        }
+                        GUILayout.EndHorizontal();
+                    }
+                }
+            }
+            GUILayout.EndScrollView();
+        }
+        
         public void MenuWindow(int wID)
         {
             bool flag = !PlayerPrefsX.GetBool("Open");
@@ -612,501 +1152,32 @@ namespace Recte_Ravenfield
                     {
                         PlayerPrefs.SetInt("menuWindow", 3);
                     }
+                    
+                    if (GUILayout.Button("Players", new GUILayoutOption[] { GUILayout.Height(35f) }))
+                    {
+                        PlayerPrefs.SetInt("menuWindow", 4);
+                    }
                     GUILayout.EndHorizontal();
 
                     if (PlayerPrefs.GetInt("menuWindow") == 0) // Render
                     {
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("FPSCounter")
-                            && GUILayout.Button(
-                                "FPS Display: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("FPSCounter", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("FPSCounter")
-                            && GUILayout.Button(
-                                "FPS Display: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("FPSCounter", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("Crosshair")
-                            && GUILayout.Button(
-                                "Crosshair: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Crosshair", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("Crosshair")
-                            && GUILayout.Button(
-                                "Crosshair: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Crosshair", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            PlayerPrefs.GetInt("CrosshairMode") == 0
-                            && GUILayout.Button(
-                                "Crosshair Mode: Normal",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefs.SetInt("CrosshairMode", 1);
-                        }
-                        if (
-                            PlayerPrefs.GetInt("CrosshairMode") == 1
-                            && GUILayout.Button(
-                                "Crosshair Mode: Diagonal",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefs.SetInt("CrosshairMode", 0);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("CoordsDisplay")
-                            && GUILayout.Button(
-                                "Coordinates: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("CoordsDisplay", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("CoordsDisplay")
-                            && GUILayout.Button(
-                                "Coordinates: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("CoordsDisplay", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("Chams")
-                            && GUILayout.Button(
-                                "Chams: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Chams", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("Chams")
-                            && GUILayout.Button(
-                                "Chams: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Chams", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("Tracers")
-                            && GUILayout.Button(
-                                "Tracers: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Tracers", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("Tracers")
-                            && GUILayout.Button(
-                                "Tracers: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Tracers", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        if (PlayerPrefsX.GetBool("Tracers"))
-                        {
-                            if (PlayerPrefs.GetInt("TracerLoc") == 0 && GUILayout.Button("Tracer Location: Center", new GUILayoutOption[] { GUILayout.Height(35f) }))
-                            {
-                                PlayerPrefs.SetInt("TracerLoc", 1);
-                            }
-                            if (PlayerPrefs.GetInt("TracerLoc") == 1 && GUILayout.Button("Tracer Location: Top", new GUILayoutOption[] { GUILayout.Height(35f) }))
-                            {
-                                PlayerPrefs.SetInt("TracerLoc", 2);
-                            }
-                            if (PlayerPrefs.GetInt("TracerLoc") == 2 && GUILayout.Button("Tracer Location: Bottom", new GUILayoutOption[] { GUILayout.Height(35f) }))
-                            {
-                                PlayerPrefs.SetInt("TracerLoc", 0);
-                            }
-                        }
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("Skeleton")
-                            && GUILayout.Button(
-                                "Skeleton: <color=red>Disabled</color> (WIP)",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Skeleton", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("Skeleton")
-                            && GUILayout.Button(
-                                "Skeleton: <color=lime>Enabled</color>(WIP)",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Skeleton", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("BoxESP")
-                            && GUILayout.Button(
-                                "BoxESP: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("BoxESP", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("BoxESP")
-                            && GUILayout.Button(
-                                "BoxESP: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("BoxESP", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("ESP")
-                            && GUILayout.Button(
-                                "ESP: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("ESP", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("ESP")
-                            && GUILayout.Button(
-                                "ESP: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("ESP", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        if (PlayerPrefsX.GetBool("ESP"))
-                        {
-                            GUILayout.BeginHorizontal();
-                            if (
-                                !PlayerPrefsX.GetBool("TeamESP")
-                                && GUILayout.Button(
-                                    "Team ESP: <color=red>Disabled</color>",
-                                    new GUILayoutOption[] { GUILayout.Height(35f) }
-                                )
-                            )
-                            {
-                                PlayerPrefsX.SetBool("TeamESP", true);
-                            }
-                            if (
-                                PlayerPrefsX.GetBool("TeamESP")
-                                && GUILayout.Button(
-                                    "Team ESP: <color=lime>Enabled</color>",
-                                    new GUILayoutOption[] { GUILayout.Height(35f) }
-                                )
-                            )
-                            {
-                                PlayerPrefsX.SetBool("TeamESP", false);
-                            }
-                            GUILayout.EndHorizontal();
-                            GUILayout.BeginHorizontal();
-                            if (
-                                !PlayerPrefsX.GetBool("EnemyESP")
-                                && GUILayout.Button(
-                                    "Enemy ESP: <color=red>Disabled</color>",
-                                    new GUILayoutOption[] { GUILayout.Height(35f) }
-                                )
-                            )
-                            {
-                                PlayerPrefsX.SetBool("EnemyESP", true);
-                            }
-                            if (
-                                PlayerPrefsX.GetBool("EnemyESP")
-                                && GUILayout.Button(
-                                    "Enemy ESP: <color=lime>Enabled</color>",
-                                    new GUILayoutOption[] { GUILayout.Height(35f) }
-                                )
-                            )
-                            {
-                                PlayerPrefsX.SetBool("EnemyESP", false);
-                            }
-                            GUILayout.EndHorizontal();
-                        }
+                        this.RenderMenu();
                     }
                     if (PlayerPrefs.GetInt("menuWindow") == 1) // Player
                     {
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("Invincible")
-                            && GUILayout.Button(
-                                "Invincible: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Invincible", true);
-                            this.player.SetHealth(float.MaxValue);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("Invincible")
-                            && GUILayout.Button(
-                                "Invincible: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Invincible", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("Speed")
-                            && GUILayout.Button(
-                                "Speed Multiplier: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Speed", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("Speed")
-                            && GUILayout.Button(
-                                "Speed Multiplier: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Speed", false);
-                        }
-                        GUILayout.EndHorizontal();
-
-                        if (PlayerPrefsX.GetBool("Speed"))
-                        {
-                            GUILayout.Label(
-                                "Speed Multiplier: " + PlayerPrefs.GetFloat("SpeedMultiply")
-                            );
-                            PlayerPrefs.SetFloat(
-                                "SpeedMultiply",
-                                GUILayout.HorizontalSlider(
-                                    Mathf.Round(PlayerPrefs.GetFloat("SpeedMultiply")),
-                                    1f,
-                                    10f,
-                                    new GUILayoutOption[0]
-                                )
-                            );
-                        }
+                        this.playerMenu();
                     }
                     if (PlayerPrefs.GetInt("menuWindow") == 2) // Weapon
                     {
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("InfiniteAmmo")
-                            && GUILayout.Button(
-                                "Infinite Ammo: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("InfiniteAmmo", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("InfiniteAmmo")
-                            && GUILayout.Button(
-                                "Infinite Ammo: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("InfiniteAmmo", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("NoRecoil")
-                            && GUILayout.Button(
-                                "NoRecoil: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("NoRecoil", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("NoRecoil")
-                            && GUILayout.Button(
-                                "NoRecoil: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("NoRecoil", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("NoSpread")
-                            && GUILayout.Button(
-                                "NoSpread: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("NoSpread", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("NoSpread")
-                            && GUILayout.Button(
-                                "NoSpread: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("NoSpread", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("RapidFire")
-                            && GUILayout.Button(
-                                "Rapid Fire: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("RapidFire", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("RapidFire")
-                            && GUILayout.Button(
-                                "Rapid Fire: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("RapidFire", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        if (
-                            !PlayerPrefsX.GetBool("Aimbot")
-                            && GUILayout.Button(
-                                "Aimbot: <color=red>Disabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Aimbot", true);
-                        }
-                        if (
-                            PlayerPrefsX.GetBool("Aimbot")
-                            && GUILayout.Button(
-                                "Aimbot: <color=lime>Enabled</color>",
-                                new GUILayoutOption[] { GUILayout.Height(35f) }
-                            )
-                        )
-                        {
-                            PlayerPrefsX.SetBool("Aimbot", false);
-                        }
-                        GUILayout.EndHorizontal();
-                        if (PlayerPrefsX.GetBool("Aimbot"))
-                        {
-                            GUILayout.Label(
-                                "Aim Offset: " + PlayerPrefs.GetFloat("AimOffset").ToString()
-                            );
-                            PlayerPrefs.SetFloat(
-                                "AimOffset",
-                                GUILayout.HorizontalSlider(
-                                    float.Parse(Math.Round((double)PlayerPrefs.GetFloat("AimOffset", 0.1f), 2).ToString()),
-                                    0f,
-                                    4f,
-                                    new GUILayoutOption[0]
-                                )
-                            );
-                            GUILayout.BeginHorizontal();
-                            if (
-                                !PlayerPrefsX.GetBool("aimFOV")
-                                && GUILayout.Button(
-                                    "FOV Circle: <color=red>Disabled</color>",
-                                    new GUILayoutOption[] { GUILayout.Height(35f) }
-                                )
-                            )
-                            {
-                                PlayerPrefsX.SetBool("aimFOV", true);
-                            }
-                            if (
-                                PlayerPrefsX.GetBool("aimFOV")
-                                && GUILayout.Button(
-                                    "FOV Circle: <color=lime>Enabled</color>",
-                                    new GUILayoutOption[] { GUILayout.Height(35f) }
-                                )
-                            )
-                            {
-                                PlayerPrefsX.SetBool("aimFOV", false);
-                            }
-                            GUILayout.EndHorizontal();
-                            GUILayout.Label(
-                                "FOV Size: " + PlayerPrefs.GetFloat("fovSize").ToString()
-                            );
-                            PlayerPrefs.SetFloat(
-                                "fovSize",
-                                GUILayout.HorizontalSlider(
-                                    Mathf.Round(PlayerPrefs.GetFloat("fovSize", 10f)),
-                                    5f,
-                                    100f,
-                                    new GUILayoutOption[0]
-                                )
-                            );
-
-                        }
+                        this.weaponMenu();
                     }
 
                     if (PlayerPrefs.GetInt("menuWindow") == 3) // Keybinds
                     { }
+                     // Teleports
+                    if (PlayerPrefs.GetInt("menuWindow") == 4) {
+                        this.playerList();
+                    } // Players
                     if (GUILayout.Button("Unload Hacks"))
                     {
                         Loader.Unload();

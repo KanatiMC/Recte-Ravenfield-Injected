@@ -10,6 +10,7 @@ namespace Recte_Ravenfield
 {
     internal static class RecteUtils
     {
+        public static GUIStyle StringStyle { get; set; } = new GUIStyle(GUI.skin.label);
         public static object GetFieldValue(this object instance, string fieldName)
         {
             FieldInfo field = instance
@@ -227,7 +228,14 @@ namespace Recte_Ravenfield
                 }
             }
         }
-
+        public static void DrawString(Vector2 position, string label, bool centered = true)
+        {
+            var content = new GUIContent(label);
+            var size = StringStyle.CalcSize(content);
+            
+            var upperLeft = centered ? position - size / 2f : position;
+            GUI.Label(new Rect(upperLeft, size), content);
+        }
         public static void DrawString(
             Vector2 pos,
             string text,
