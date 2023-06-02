@@ -8,22 +8,31 @@ namespace Recte_Ravenfield
 {
     public class RecteManager : MonoBehaviour
     {
-
         /*
          * TO-DO List
-         * 
+         *
          * 1. Add Keycodes
-         * 2. Add Teleporting
-         * 3. Add Players Menu
+         * 2. Add Teleporting - Done
+         * 3. Add Players Menu - Done
          * 4. Add Coloring Menu
          * 5. Add Different Health Bar Locations
          * 6. Fix Aimbot
+         * 7. Have Healthbar Scale With Box
+         * 
          * */
         public void Update()
         {
             try
             {
-                if (Input.GetKeyDown((KeyCode)Enum.Parse(typeof(KeyCode), PlayerPrefs.GetString("MenuKeycode", "RightShift"))))
+                if (
+                    Input.GetKeyDown(
+                        (KeyCode)
+                            Enum.Parse(
+                                typeof(KeyCode),
+                                PlayerPrefs.GetString("MenuKeycode", "RightShift")
+                            )
+                    )
+                )
                 {
                     PlayerPrefsX.SetBool("Open", !PlayerPrefsX.GetBool("Open"));
                 }
@@ -237,9 +246,6 @@ namespace Recte_Ravenfield
         public static Texture DefaultTexture;
         public static Shader DefaultShader;
 
-        
-
-
         private void Chams()
         {
             Color color = Color.Lerp(
@@ -259,23 +265,29 @@ namespace Recte_Ravenfield
                 {
                     foreach (Material m in r.materials)
                     {
-                        if (PlayerPrefsX.GetBool("Chams"))
-                        {
-                            Shader shader = Shader.Find("GUI/Text Shader");
-                            // Default shader on Unity
-                            m.shader = shader;
-                            m.color = color;
-                            m.renderQueue = 4000;
+                        if (PlayerPrefsX.GetBool("Chams")) {
+                            if (m.shader == DefaultShader)
+                            {
+                                if (PlayerPrefsX.GetBool("Chams"))
+                                {
+                                    Shader shader = Shader.Find("GUI/Text Shader");
+                                    // Default shader on Unity
+                                    m.shader = shader;
+                                    m.color = color;
+                                    m.renderQueue = 4000;
+                                }
+                            }
                         }
-                        else
+                        if (!PlayerPrefsX.GetBool("Chams"))
                         {
                             m.shader = DefaultShader;
-                            m.mainTexture = DefaultTexture;
                         }
+                        
                     }
                 }
             }
         }
+
         public void Tracers()
         {
             foreach (Actor a in ActorManager.instance.actors)
@@ -288,38 +300,61 @@ namespace Recte_Ravenfield
                     {
                         if (PlayerPrefs.GetInt("TracerLoc") == 0)
                         {
-                            RecteUtils.DrawLine(new Vector2((float)Screen.width / 2f, (float)Screen.height / 2f), new Vector2(vector.x, (float)Screen.height - vector.y - 64f), 3f, color2);
+                            RecteUtils.DrawLine(
+                                new Vector2((float)Screen.width / 2f, (float)Screen.height / 2f),
+                                new Vector2(vector.x, (float)Screen.height - vector.y - 64f),
+                                3f,
+                                color2
+                            );
                         }
                         if (PlayerPrefs.GetInt("TracerLoc") == 1)
                         {
-                            RecteUtils.DrawLine(new Vector2((float)Screen.width / 2f, 0f), new Vector2(vector.x, (float)Screen.height - vector.y - 64f), 3f, color2);
+                            RecteUtils.DrawLine(
+                                new Vector2((float)Screen.width / 2f, 0f),
+                                new Vector2(vector.x, (float)Screen.height - vector.y - 64f),
+                                3f,
+                                color2
+                            );
                         }
                         if (PlayerPrefs.GetInt("TracerLoc") == 2)
                         {
-                            RecteUtils.DrawLine(new Vector2((float)Screen.width / 2f, (float)Screen.height), new Vector2(vector.x, (float)Screen.height - vector.y - 64f), 3f, color2);
+                            RecteUtils.DrawLine(
+                                new Vector2((float)Screen.width / 2f, (float)Screen.height),
+                                new Vector2(vector.x, (float)Screen.height - vector.y - 64f),
+                                3f,
+                                color2
+                            );
                         }
                     }
                 }
             }
         }
 
-       
         public void OnGUI()
         {
-            
-               
-                
-                bool @bool = PlayerPrefsX.GetBool("Open");
-                if (@bool)
-                {
-                this.rect1 = GUILayout.Window(1, this.rect1, new GUI.WindowFunction(this.MenuWindow), "Recte | kanati.gay", new GUILayoutOption[0]);
-                }
-            
+            bool @bool = PlayerPrefsX.GetBool("Open");
+            if (@bool)
+            {
+                this.rect1 = GUILayout.Window(
+                    1,
+                    this.rect1,
+                    new GUI.WindowFunction(this.MenuWindow),
+                    "Recte | kanati.gay",
+                    new GUILayoutOption[0]
+                );
+            }
+
             try
             {
                 if (PlayerPrefsX.GetBool("aimFOV"))
                 {
-                    RecteUtils.DrawCircle(RecteUtils.CenterOfScreen(), PlayerPrefs.GetFloat("fovSize", 10f), Color.cyan, 5, 10);
+                    RecteUtils.DrawCircle(
+                        RecteUtils.CenterOfScreen(),
+                        PlayerPrefs.GetFloat("fovSize", 10f),
+                        Color.cyan,
+                        5,
+                        10
+                    );
                 }
                 if (PlayerPrefsX.GetBool("Tracers"))
                 {
@@ -341,7 +376,6 @@ namespace Recte_Ravenfield
                 }
                 if (PlayerPrefsX.GetBool("Crosshair"))
                 {
-
                     if (PlayerPrefs.GetInt("CrosshairMode") == 1)
                     {
                         Vector2 cen = new Vector2(
@@ -389,7 +423,9 @@ namespace Recte_Ravenfield
                             new string[]
                             {
                                 string.Format(
-                                    "<b><color=#" + PlayerPrefs.GetString("CoordsHex", "8a2be2") + ">",
+                                    "<b><color=#"
+                                        + PlayerPrefs.GetString("CoordsHex", "8a2be2")
+                                        + ">",
                                     Array.Empty<object>()
                                 ),
                                 text,
@@ -418,12 +454,13 @@ namespace Recte_Ravenfield
                             Vector3 vector = Camera.main.WorldToScreenPoint(
                                 actor.transform.position
                             );
-                            float dis = Mathf.Round(Vector3.Distance(actor.Position(), player.Position()));
+                            float dis = Mathf.Round(
+                                Vector3.Distance(actor.Position(), player.Position())
+                            );
                             if (!actor.dead)
                             {
                                 if (vector.z > 0f)
                                 {
-                                    
                                     if (PlayerPrefsX.GetBool("BoxESP"))
                                     {
                                         /*
@@ -431,28 +468,80 @@ namespace Recte_Ravenfield
                                         RecteUtils.DrawLine(new Vector2(num5 + num7 * actor.health / 100f, num6 - num8 - 45f), new Vector2(num5, num6 - num8 - 45f), RecteUtils.hpColor(actor.health), 3f);
                                         */
                                         Vector3 pivotPos = actor.transform.position; //Pivot point NOT at the origin, at the center
-                                        Vector3 playerFootPos; playerFootPos.x = pivotPos.x; playerFootPos.z = pivotPos.z; playerFootPos.y = pivotPos.y - 2f;
-                                        Vector3 playerHeadPos; playerHeadPos.x = pivotPos.x; playerHeadPos.z = pivotPos.z; playerHeadPos.y = pivotPos.y + 2f; //At the feet
-                                        Vector3 w2s_footpos = Camera.main.WorldToScreenPoint(playerFootPos); //At the feet
-                                        Vector3 w2s_headpos = Camera.main.WorldToScreenPoint(playerHeadPos);
+                                        Vector3 playerFootPos;
+                                        playerFootPos.x = pivotPos.x;
+                                        playerFootPos.z = pivotPos.z;
+                                        playerFootPos.y = pivotPos.y - 2f;
+                                        Vector3 playerHeadPos;
+                                        playerHeadPos.x = pivotPos.x;
+                                        playerHeadPos.z = pivotPos.z;
+                                        playerHeadPos.y = pivotPos.y + 2f; //At the feet
+                                        Vector3 w2s_footpos = Camera.main.WorldToScreenPoint(
+                                            playerFootPos
+                                        ); //At the feet
+                                        Vector3 w2s_headpos = Camera.main.WorldToScreenPoint(
+                                            playerHeadPos
+                                        );
                                         float height = w2s_headpos.y - w2s_footpos.y;
                                         float widthOffset = 2f;
                                         float width = height / widthOffset;
                                         //RecteUtils.DrawLine(new Vector2(w2s_footpos.x - (width / 2), (float)Screen.height - w2s_footpos.y - height), )
-                                        RecteUtils.DrawLine(new Vector2(w2s_footpos.x - (width / 2), (float)Screen.height - w2s_footpos.y - height - 15f), new Vector2(w2s_footpos.x - (width / 2) + width, (float)Screen.height - w2s_footpos.y - height - 15f), Color.black, 4f);
-                                        RecteUtils.DrawLine(new Vector2(w2s_footpos.x - (width / 2) , (float)Screen.height - w2s_footpos.y - height - 15f), new Vector2(w2s_footpos.x - (width / 2) + width * actor.health / 100f, (float)Screen.height - w2s_footpos.y - height - 15f), RecteUtils.hpColor(actor.health), 3f);
-                                        RecteUtils.DrawBox(w2s_footpos.x - (width / 2), (float)Screen.height - w2s_footpos.y - height, width, height, Color.red, 2f);
+                                        RecteUtils.DrawLine(
+                                            new Vector2(
+                                                w2s_footpos.x - (width / 2),
+                                                (float)Screen.height - w2s_footpos.y - height - 15f * dis / 100f
+                                            ),
+                                            new Vector2(
+                                                w2s_footpos.x - (width / 2) + width,
+                                                (float)Screen.height - w2s_footpos.y - height - 15f * dis / 100f
+                                            ),
+                                            Color.black,
+                                            4f
+                                        );
+                                        RecteUtils.DrawLine(
+                                            new Vector2(
+                                                w2s_footpos.x - (width / 2),
+                                                (float)Screen.height - w2s_footpos.y - height - 15f * dis / 100f
+                                            ),
+                                            new Vector2(
+                                                w2s_footpos.x
+                                                    - (width / 2)
+                                                    + width * actor.health / 100f,
+                                                (float)Screen.height - w2s_footpos.y - height - 15f * dis / 100f
+                                            ),
+                                            RecteUtils.hpColor(actor.health),
+                                            3f
+                                        );
+                                        RecteUtils.DrawBox(
+                                            w2s_footpos.x - (width / 2),
+                                            (float)Screen.height - w2s_footpos.y - height,
+                                            width,
+                                            height,
+                                            Color.red,
+                                            2f
+                                        );
                                     }
                                     if (actor.team == 0 && PlayerPrefsX.GetBool("TeamESP"))
                                     {
-                                        RecteUtils.DrawString(new Vector2(vector.x - 5f, (float)Screen.height - vector.y), $"<b><color=#009666>{actor.name}\nHP: {Mathf.Round(actor.health)}/{actor.maxHealth}\n[{dis}m]</color></b>", true);
-                                        
-                                        
-                                        
+                                        RecteUtils.DrawString(
+                                            new Vector2(
+                                                vector.x - 5f,
+                                                (float)Screen.height - vector.y
+                                            ),
+                                            $"<b><color=#009666>{actor.name}\nHP: {Mathf.Round(actor.health)}/{actor.maxHealth}\n[{dis}m]</color></b>",
+                                            true
+                                        );
                                     }
                                     if (actor.team == 1 && PlayerPrefsX.GetBool("EnemyESP"))
                                     {
-                                        RecteUtils.DrawString(new Vector2(vector.x - 5f, (float)Screen.height - vector.y), $"<b><color=#937cf2>{actor.name}\nHP: {Mathf.Round(actor.health)}/{actor.maxHealth}\n[{dis}m]</color></b>", true);
+                                        RecteUtils.DrawString(
+                                            new Vector2(
+                                                vector.x - 5f,
+                                                (float)Screen.height - vector.y
+                                            ),
+                                            $"<b><color=#937cf2>{actor.name}\nHP: {Mathf.Round(actor.health)}/{actor.maxHealth}\n[{dis}m]</color></b>",
+                                            true
+                                        );
                                     }
                                 }
                             }
@@ -462,6 +551,7 @@ namespace Recte_Ravenfield
             }
             catch (NullReferenceException) { }
         }
+
         private bool IsInFieldOfView(Vector2 screenPosition)
         {
             if (PlayerPrefs.GetFloat("fovSize") <= 0f)
@@ -470,9 +560,11 @@ namespace Recte_Ravenfield
             var distance = Vector2.Distance(RecteUtils.CenterOfScreen(), screenPosition);
             return distance <= PlayerPrefs.GetFloat("fovSize");
         }
+
         private Camera main = Camera.main;
 
         private GameObject closestObject;
+
         public void RenderMenu()
         {
             GUILayout.BeginHorizontal();
@@ -609,15 +701,33 @@ namespace Recte_Ravenfield
             GUILayout.EndHorizontal();
             if (PlayerPrefsX.GetBool("Tracers"))
             {
-                if (PlayerPrefs.GetInt("TracerLoc") == 0 && GUILayout.Button("Tracer Location: Center", new GUILayoutOption[] { GUILayout.Height(35f) }))
+                if (
+                    PlayerPrefs.GetInt("TracerLoc") == 0
+                    && GUILayout.Button(
+                        "Tracer Location: Center",
+                        new GUILayoutOption[] { GUILayout.Height(35f) }
+                    )
+                )
                 {
                     PlayerPrefs.SetInt("TracerLoc", 1);
                 }
-                if (PlayerPrefs.GetInt("TracerLoc") == 1 && GUILayout.Button("Tracer Location: Top", new GUILayoutOption[] { GUILayout.Height(35f) }))
+                if (
+                    PlayerPrefs.GetInt("TracerLoc") == 1
+                    && GUILayout.Button(
+                        "Tracer Location: Top",
+                        new GUILayoutOption[] { GUILayout.Height(35f) }
+                    )
+                )
                 {
                     PlayerPrefs.SetInt("TracerLoc", 2);
                 }
-                if (PlayerPrefs.GetInt("TracerLoc") == 2 && GUILayout.Button("Tracer Location: Bottom", new GUILayoutOption[] { GUILayout.Height(35f) }))
+                if (
+                    PlayerPrefs.GetInt("TracerLoc") == 2
+                    && GUILayout.Button(
+                        "Tracer Location: Bottom",
+                        new GUILayoutOption[] { GUILayout.Height(35f) }
+                    )
+                )
                 {
                     PlayerPrefs.SetInt("TracerLoc", 0);
                 }
@@ -736,6 +846,7 @@ namespace Recte_Ravenfield
                 GUILayout.EndHorizontal();
             }
         }
+
         public void Aimbot()
         {
             Vector3 mp = new Vector3((float)Screen.width / 2f, (float)Screen.height / 2f);
@@ -755,7 +866,10 @@ namespace Recte_Ravenfield
                             {
                                 if (IsInFieldOfView(v5))
                                 {
-                                    float distance = Vector3.Distance(RecteUtils.CenterOfScreen(), a.transform.position);
+                                    float distance = Vector3.Distance(
+                                        RecteUtils.CenterOfScreen(),
+                                        a.transform.position
+                                    );
                                     if (distance < closestdistance) // or <= ,i will explain 2 cases.
                                     {
                                         closestdistance = distance;
@@ -772,10 +886,9 @@ namespace Recte_Ravenfield
                 if (IsInFieldOfView(v2))
                 {
                     this.player.activeWeapon.transform.LookAt(
-                    closestObject.transform.position
-                        + Vector3.up * PlayerPrefs.GetFloat("AimOffset", .5f)
-
-                 );
+                        closestObject.transform.position
+                            + Vector3.up * PlayerPrefs.GetFloat("AimOffset", .5f)
+                    );
                 }
                 //FpsActorController.instance.fpCamera.transform.LookAt(closestObject.transform.position + Vector3.up * PlayerPrefs.GetFloat("AimOffset", .5f));
             }
@@ -783,7 +896,6 @@ namespace Recte_Ravenfield
 
         private Actor target;
         private Rect rect1;
-       
 
         private Actor GetTarget()
         {
@@ -823,6 +935,7 @@ namespace Recte_Ravenfield
 
         private ActorManager am;
         private Actor player;
+
         public void playerMenu()
         {
             GUILayout.BeginHorizontal();
@@ -873,9 +986,7 @@ namespace Recte_Ravenfield
 
             if (PlayerPrefsX.GetBool("Speed"))
             {
-                GUILayout.Label(
-                    "Speed Multiplier: " + PlayerPrefs.GetFloat("SpeedMultiply")
-                );
+                GUILayout.Label("Speed Multiplier: " + PlayerPrefs.GetFloat("SpeedMultiply"));
                 PlayerPrefs.SetFloat(
                     "SpeedMultiply",
                     GUILayout.HorizontalSlider(
@@ -888,22 +999,39 @@ namespace Recte_Ravenfield
             }
             GUILayout.BeginHorizontal();
             GUILayout.Label("X: ");
-            PlayerPrefs.SetString("TeleportX", GUILayout.TextField(PlayerPrefs.GetString("TeleportX"), new GUILayoutOption[0]));
+            PlayerPrefs.SetString(
+                "TeleportX",
+                GUILayout.TextField(PlayerPrefs.GetString("TeleportX"), new GUILayoutOption[0])
+            );
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             GUILayout.Label("Y: ");
-            PlayerPrefs.SetString("TeleportY", GUILayout.TextField(PlayerPrefs.GetString("TeleportY"), new GUILayoutOption[0]));
+            PlayerPrefs.SetString(
+                "TeleportY",
+                GUILayout.TextField(PlayerPrefs.GetString("TeleportY"), new GUILayoutOption[0])
+            );
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             GUILayout.Label("Z: ");
-            PlayerPrefs.SetString("TeleportZ", GUILayout.TextField(PlayerPrefs.GetString("TeleportZ"), new GUILayoutOption[0]));
+            PlayerPrefs.SetString(
+                "TeleportZ",
+                GUILayout.TextField(PlayerPrefs.GetString("TeleportZ"), new GUILayoutOption[0])
+            );
             GUILayout.EndHorizontal();
             if (GUILayout.Button("Teleport To Coords", new GUILayoutOption[0]))
             {
-                this.player.SetPositionAndRotation(new Vector3(float.Parse(PlayerPrefs.GetString("TeleportX")), float.Parse(PlayerPrefs.GetString("TeleportY")), float.Parse(PlayerPrefs.GetString("TeleportZ"))), player.transform.rotation);
+                this.player.SetPositionAndRotation(
+                    new Vector3(
+                        float.Parse(PlayerPrefs.GetString("TeleportX")),
+                        float.Parse(PlayerPrefs.GetString("TeleportY")),
+                        float.Parse(PlayerPrefs.GetString("TeleportZ"))
+                    ),
+                    player.transform.rotation
+                );
                 //this.player.transform.position = new Vector3(float.Parse(PlayerPrefs.GetString("TeleportX")), float.Parse(PlayerPrefs.GetString("TeleportY")), float.Parse(PlayerPrefs.GetString("TeleportZ")));
             }
         }
+
         public void weaponMenu()
         {
             GUILayout.BeginHorizontal();
@@ -1018,13 +1146,14 @@ namespace Recte_Ravenfield
             GUILayout.EndHorizontal();
             if (PlayerPrefsX.GetBool("Aimbot"))
             {
-                GUILayout.Label(
-                    "Aim Offset: " + PlayerPrefs.GetFloat("AimOffset").ToString()
-                );
+                GUILayout.Label("Aim Offset: " + PlayerPrefs.GetFloat("AimOffset").ToString());
                 PlayerPrefs.SetFloat(
                     "AimOffset",
                     GUILayout.HorizontalSlider(
-                        float.Parse(Math.Round((double)PlayerPrefs.GetFloat("AimOffset", 0.1f), 2).ToString()),
+                        float.Parse(
+                            Math.Round((double)PlayerPrefs.GetFloat("AimOffset", 0.1f), 2)
+                                .ToString()
+                        ),
                         0f,
                         4f,
                         new GUILayoutOption[0]
@@ -1052,9 +1181,7 @@ namespace Recte_Ravenfield
                     PlayerPrefsX.SetBool("aimFOV", false);
                 }
                 GUILayout.EndHorizontal();
-                GUILayout.Label(
-                    "FOV Size: " + PlayerPrefs.GetFloat("fovSize").ToString()
-                );
+                GUILayout.Label("FOV Size: " + PlayerPrefs.GetFloat("fovSize").ToString());
                 PlayerPrefs.SetFloat(
                     "fovSize",
                     GUILayout.HorizontalSlider(
@@ -1064,34 +1191,50 @@ namespace Recte_Ravenfield
                         new GUILayoutOption[0]
                     )
                 );
-
             }
         }
+
         public Vector2 scrollPos;
+
         public void playerList()
         {
-            this.scrollPos = GUILayout.BeginScrollView(this.scrollPos, new GUILayoutOption[]
-        {
-            GUILayout.Height(500f)
-        });
+            this.scrollPos = GUILayout.BeginScrollView(
+                this.scrollPos,
+                new GUILayoutOption[] { GUILayout.Height(500f) }
+            );
             GUILayout.Label("Player Team");
-            
+
             foreach (Actor a in ActorManager.instance.actors)
             {
                 if (a != null)
                 {
-
                     if (a.team == 0)
                     {
-                        GUILayout.Button("<b><color=blue>" + a.name + "</color></b>", new GUILayoutOption[] { GUILayout.Height(25f) });
+                        GUILayout.Button(
+                            "<b><color=blue>" + a.name + "</color></b>",
+                            new GUILayoutOption[] { GUILayout.Height(25f) }
+                        );
                         GUILayout.BeginHorizontal();
-                        if (GUILayout.Button("<b><color=red>Kill</color></b>", new GUILayoutOption[] { GUILayout.Height(25f) }))
+                        if (
+                            GUILayout.Button(
+                                "<b><color=red>Kill</color></b>",
+                                new GUILayoutOption[] { GUILayout.Height(25f) }
+                            )
+                        )
                         {
                             a.Kill(DamageInfo.Default);
                         }
-                        if (GUILayout.Button("Teleport", new GUILayoutOption[] { GUILayout.Height(25f) }))
+                        if (
+                            GUILayout.Button(
+                                "Teleport",
+                                new GUILayoutOption[] { GUILayout.Height(25f) }
+                            )
+                        )
                         {
-                            this.player.SetPositionAndRotation(a.transform.position + a.transform.up * 2f, player.transform.rotation);
+                            this.player.SetPositionAndRotation(
+                                a.transform.position + a.transform.up * 2f,
+                                player.transform.rotation
+                            );
                         }
                         GUILayout.EndHorizontal();
                     }
@@ -1102,18 +1245,33 @@ namespace Recte_Ravenfield
             {
                 if (a != null)
                 {
-
                     if (a.team == 1)
                     {
-                        GUILayout.Button("<b><color=red>" + a.name + "</color></b>", new GUILayoutOption[] { GUILayout.Height(25f) });
+                        GUILayout.Button(
+                            "<b><color=red>" + a.name + "</color></b>",
+                            new GUILayoutOption[] { GUILayout.Height(25f) }
+                        );
                         GUILayout.BeginHorizontal();
-                        if (GUILayout.Button("<b><color=red>Kill</color></b>", new GUILayoutOption[] { GUILayout.Height(25f) }))
+                        if (
+                            GUILayout.Button(
+                                "<b><color=red>Kill</color></b>",
+                                new GUILayoutOption[] { GUILayout.Height(25f) }
+                            )
+                        )
                         {
                             a.Kill(DamageInfo.Default);
                         }
-                        if (GUILayout.Button("Teleport", new GUILayoutOption[] { GUILayout.Height(25f) }))
+                        if (
+                            GUILayout.Button(
+                                "Teleport",
+                                new GUILayoutOption[] { GUILayout.Height(25f) }
+                            )
+                        )
                         {
-                            this.player.SetPositionAndRotation(a.transform.position + a.transform.up * 2f, player.transform.rotation);
+                            this.player.SetPositionAndRotation(
+                                a.transform.position + a.transform.up * 2f,
+                                player.transform.rotation
+                            );
                         }
                         GUILayout.EndHorizontal();
                     }
@@ -1121,7 +1279,7 @@ namespace Recte_Ravenfield
             }
             GUILayout.EndScrollView();
         }
-        
+
         public void MenuWindow(int wID)
         {
             bool flag = !PlayerPrefsX.GetBool("Open");
@@ -1152,8 +1310,10 @@ namespace Recte_Ravenfield
                     {
                         PlayerPrefs.SetInt("menuWindow", 3);
                     }
-                    
-                    if (GUILayout.Button("Players", new GUILayoutOption[] { GUILayout.Height(35f) }))
+
+                    if (
+                        GUILayout.Button("Players", new GUILayoutOption[] { GUILayout.Height(35f) })
+                    )
                     {
                         PlayerPrefs.SetInt("menuWindow", 4);
                     }
@@ -1174,8 +1334,9 @@ namespace Recte_Ravenfield
 
                     if (PlayerPrefs.GetInt("menuWindow") == 3) // Keybinds
                     { }
-                     // Teleports
-                    if (PlayerPrefs.GetInt("menuWindow") == 4) {
+                    // Teleports
+                    if (PlayerPrefs.GetInt("menuWindow") == 4)
+                    {
                         this.playerList();
                     } // Players
                     if (GUILayout.Button("Unload Hacks"))

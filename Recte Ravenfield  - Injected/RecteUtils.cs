@@ -11,6 +11,7 @@ namespace Recte_Ravenfield
     internal static class RecteUtils
     {
         public static GUIStyle StringStyle { get; set; } = new GUIStyle(GUI.skin.label);
+
         public static object GetFieldValue(this object instance, string fieldName)
         {
             FieldInfo field = instance
@@ -24,10 +25,12 @@ namespace Recte_Ravenfield
                 );
             return (field == null) ? null : field.GetValue(instance);
         }
+
         public static int HexToDec(string Hex)
         {
             return Convert.ToInt32(Hex, 16);
         }
+
         public static string CreateRandomString(int _length)
         {
             string text = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=_{}|;':";
@@ -38,6 +41,7 @@ namespace Recte_Ravenfield
             }
             return new string(array);
         }
+
         public static void DrawBox(float x, float y, float w, float h, Color color, float thickness)
         {
             DrawLine(new Vector2(x, y), new Vector2(x + w, y), color, thickness);
@@ -45,6 +49,7 @@ namespace Recte_Ravenfield
             DrawLine(new Vector2(x + w, y), new Vector2(x + w, y + h), color, thickness);
             DrawLine(new Vector2(x, y + h), new Vector2(x + w, y + h), color, thickness);
         }
+
         public static Color hpColor(float hp)
         {
             Color c = new Color();
@@ -53,7 +58,6 @@ namespace Recte_Ravenfield
             float healthCalc = (float)(((float)hp / (float)100)) * 100f;
             float N_root = (float)Mathf.Pow((healthCalc / 100f), (1f / M));
             float N_power = (float)Mathf.Pow((healthCalc / 100f), N);
-
 
             if (healthCalc < 50)
             {
@@ -65,12 +69,20 @@ namespace Recte_Ravenfield
             }
             return c;
         }
+
         // Token: 0x06001BBD RID: 7101 RVA: 0x0002D219 File Offset: 0x0002B419
         public static float HexToFloatNormalized(string Hex)
         {
             return (float)RecteUtils.HexToDec(Hex) / 255f;
         }
-        public static void DrawCircle(Vector2 center, float radius, Color color, float width, int segmentsPerQuarter)
+
+        public static void DrawCircle(
+            Vector2 center,
+            float radius,
+            Color color,
+            float width,
+            int segmentsPerQuarter
+        )
         {
             GUI.color = color;
             int totalSegments = segmentsPerQuarter * 4;
@@ -80,26 +92,34 @@ namespace Recte_Ravenfield
             for (int i = 1; i <= totalSegments; ++i)
             {
                 float t = i * step;
-                var currentV = center + new Vector2(
-                    radius * Mathf.Cos(2 * Mathf.PI * t),
-                    radius * Mathf.Sin(2 * Mathf.PI * t)
-                );
+                var currentV =
+                    center
+                    + new Vector2(
+                        radius * Mathf.Cos(2 * Mathf.PI * t),
+                        radius * Mathf.Sin(2 * Mathf.PI * t)
+                    );
                 DrawLine(lastV, currentV, width, color);
                 lastV = currentV;
             }
         }
 
-
         public static Vector2 CenterOfScreen()
         {
             return new Vector2((float)Screen.width / 2f, (float)Screen.height / 2f);
         }
-        public static void DrawLine(Vector2 lineStart, Vector2 lineEnd, float thickness, Color color)
+
+        public static void DrawLine(
+            Vector2 lineStart,
+            Vector2 lineEnd,
+            float thickness,
+            Color color
+        )
         {
             GUI.color = color;
 
             var vector = lineEnd - lineStart;
-            float pivot = /* 180/PI */ Mathf.Rad2Deg * Mathf.Atan(vector.y / vector.x);
+            float pivot = /* 180/PI */
+                Mathf.Rad2Deg * Mathf.Atan(vector.y / vector.x);
             if (vector.x < 0f)
                 pivot += 180f;
 
@@ -107,17 +127,28 @@ namespace Recte_Ravenfield
             int yOffset = (int)Mathf.Ceil(thickness / 2);
 
             GUIUtility.RotateAroundPivot(pivot, lineStart);
-            GUI.DrawTexture(new Rect(lineStart.x, lineStart.y - yOffset, vector.magnitude, thickness), Texture2D.whiteTexture);
+            GUI.DrawTexture(
+                new Rect(lineStart.x, lineStart.y - yOffset, vector.magnitude, thickness),
+                Texture2D.whiteTexture
+            );
             GUIUtility.RotateAroundPivot(-pivot, lineStart);
         }
+
         public static void DrawCrosshair(Vector2 position, float size, Color color, float thickness)
         {
             //Pasted From https://github.com/sailro/EscapeFromTarkov-Trainer/blob/master/UI/Render.cs
             GUI.color = color;
             var texture = Texture2D.whiteTexture;
-            GUI.DrawTexture(new Rect(position.x - size, position.y, size * 2 + thickness, thickness), texture);
-            GUI.DrawTexture(new Rect(position.x, position.y - size, thickness, size * 2 + thickness), texture);
+            GUI.DrawTexture(
+                new Rect(position.x - size, position.y, size * 2 + thickness, thickness),
+                texture
+            );
+            GUI.DrawTexture(
+                new Rect(position.x, position.y - size, thickness, size * 2 + thickness),
+                texture
+            );
         }
+
         // Token: 0x06001BBE RID: 7102 RVA: 0x001070E8 File Offset: 0x001052E8
         public static Color GetColorFromString(string HexCode)
         {
@@ -126,6 +157,7 @@ namespace Recte_Ravenfield
             float num3 = RecteUtils.HexToFloatNormalized(HexCode.Substring(4, 2));
             return new Color(num, num2, num3);
         }
+
         public static void DrawLine(Vector2 pointA, Vector2 pointB, Color color, float width)
         {
             Matrix4x4 matrix = GUI.matrix;
@@ -228,14 +260,16 @@ namespace Recte_Ravenfield
                 }
             }
         }
+
         public static void DrawString(Vector2 position, string label, bool centered = true)
         {
             var content = new GUIContent(label);
             var size = StringStyle.CalcSize(content);
-            
+
             var upperLeft = centered ? position - size / 2f : position;
             GUI.Label(new Rect(upperLeft, size), content);
         }
+
         public static void DrawString(
             Vector2 pos,
             string text,
