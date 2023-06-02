@@ -485,15 +485,19 @@ namespace Recte_Ravenfield
                                         float height = w2s_headpos.y - w2s_footpos.y;
                                         float widthOffset = 2f;
                                         float width = height / widthOffset;
+                                        float distanceAboveLine = (float)Screen.height - w2s_footpos.y - height - 75f / dis;
+
+
+
                                         //RecteUtils.DrawLine(new Vector2(w2s_footpos.x - (width / 2), (float)Screen.height - w2s_footpos.y - height), )
                                         RecteUtils.DrawLine(
                                             new Vector2(
                                                 w2s_footpos.x - (width / 2),
-                                                (float)Screen.height - w2s_footpos.y - height - 15f * dis / 100f
+                                                distanceAboveLine
                                             ),
                                             new Vector2(
                                                 w2s_footpos.x - (width / 2) + width,
-                                                (float)Screen.height - w2s_footpos.y - height - 15f * dis / 100f
+                                                distanceAboveLine
                                             ),
                                             Color.black,
                                             4f
@@ -501,13 +505,11 @@ namespace Recte_Ravenfield
                                         RecteUtils.DrawLine(
                                             new Vector2(
                                                 w2s_footpos.x - (width / 2),
-                                                (float)Screen.height - w2s_footpos.y - height - 15f * dis / 100f
+                                                distanceAboveLine
                                             ),
                                             new Vector2(
-                                                w2s_footpos.x
-                                                    - (width / 2)
-                                                    + width * actor.health / 100f,
-                                                (float)Screen.height - w2s_footpos.y - height - 15f * dis / 100f
+                                                w2s_footpos.x - (width / 2) + width * actor.health / 100f,
+                                                distanceAboveLine
                                             ),
                                             RecteUtils.hpColor(actor.health),
                                             3f
