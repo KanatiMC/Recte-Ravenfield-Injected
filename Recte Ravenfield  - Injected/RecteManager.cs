@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using MapMagic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Recte_Ravenfield
 {
@@ -329,9 +331,11 @@ namespace Recte_Ravenfield
                 }
             }
         }
-
+        public IMColorPicker colorPicker;
         public void OnGUI()
         {
+            
+            
             bool @bool = PlayerPrefsX.GetBool("Open");
             if (@bool)
             {
@@ -376,33 +380,9 @@ namespace Recte_Ravenfield
                 }
                 if (PlayerPrefsX.GetBool("Crosshair"))
                 {
-                    if (PlayerPrefs.GetInt("CrosshairMode") == 1)
-                    {
-                        Vector2 cen = new Vector2(
-                            (float)Screen.width / 2f,
-                            (float)Screen.height / 2f
-                        );
-                        RecteUtils.DrawLine(
-                            new Vector2(cen.x - 15f, cen.y - 15f),
-                            new Vector2(cen.x + 15f, cen.y + 15f),
-                            Color.cyan,
-                            3f
-                        );
-                        RecteUtils.DrawLine(
-                            new Vector2(cen.x - 15f, cen.y + 15f),
-                            new Vector2(cen.x + 15f, cen.y - 15f),
-                            Color.cyan,
-                            3f
-                        );
-                    }
-                    if (PlayerPrefs.GetInt("CrosshairMode") == 0)
-                    {
-                        Vector2 cen = new Vector2(
-                            (float)Screen.width / 2f,
-                            (float)Screen.height / 2f
-                        );
-                        RecteUtils.DrawCrosshair(cen, 15f, Color.cyan, 3f);
-                    }
+                    
+                    RecteUtils.DrawCrosshair(RecteUtils.CenterOfScreen(), 15f, PlayerPrefsX.GetColor("CrosshairColor", Color.cyan), 3f);
+                    
                 }
                 if (PlayerPrefsX.GetBool("CoordsDisplay"))
                 {
@@ -615,28 +595,6 @@ namespace Recte_Ravenfield
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             if (
-                PlayerPrefs.GetInt("CrosshairMode") == 0
-                && GUILayout.Button(
-                    "Crosshair Mode: Normal",
-                    new GUILayoutOption[] { GUILayout.Height(35f) }
-                )
-            )
-            {
-                PlayerPrefs.SetInt("CrosshairMode", 1);
-            }
-            if (
-                PlayerPrefs.GetInt("CrosshairMode") == 1
-                && GUILayout.Button(
-                    "Crosshair Mode: Diagonal",
-                    new GUILayoutOption[] { GUILayout.Height(35f) }
-                )
-            )
-            {
-                PlayerPrefs.SetInt("CrosshairMode", 0);
-            }
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            if (
                 !PlayerPrefsX.GetBool("CoordsDisplay")
                 && GUILayout.Button(
                     "Coordinates: <color=red>Disabled</color>",
@@ -656,7 +614,30 @@ namespace Recte_Ravenfield
             {
                 PlayerPrefsX.SetBool("CoordsDisplay", false);
             }
+            
+            if (
+                !PlayerPrefsX.GetBool("CrosshairPicker")
+                && GUILayout.Button(
+                    "Crosshair Color Picker: Open",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("CrosshairPicker", true);
+            }
+            if (
+                PlayerPrefsX.GetBool("CrosshairPicker")
+                && GUILayout.Button(
+                    "Crosshair Color Picker: Close",
+                    new GUILayoutOption[] { GUILayout.Height(35f) }
+                )
+            )
+            {
+                PlayerPrefsX.SetBool("CrosshairPicker", false);
+            }
             GUILayout.EndHorizontal();
+            
+            
             GUILayout.BeginHorizontal();
             if (
                 !PlayerPrefsX.GetBool("Chams")
@@ -932,6 +913,10 @@ namespace Recte_Ravenfield
 
         public void Start()
         {
+            if (colorPicker == null)
+            {
+                colorPicker = new IMColorPicker();
+            }
             this.rect1 = new Rect((float)((double)Screen.width / 2.64), 70f, 431f, 50f);
         }
 
@@ -1281,7 +1266,39 @@ namespace Recte_Ravenfield
             }
             GUILayout.EndScrollView();
         }
+        public void ColorPicker()
+        {
+            GUILayout.BeginHorizontal();
+            if (colorPicker != null)
+            {
+                colorPicker.DrawColorPicker();
+            }
+            if (PlayerPrefs.GetString("ColorPickerString").Replace("#", string.Empty).Length == 6 && colorPicker.color != RecteUtils.GetColorFromString(PlayerPrefs.GetString("ColorPickerString").Replace("#", string.Empty)))
+            {
+                colorPicker.color = RecteUtils.GetColorFromString(PlayerPrefs.GetString("ColorPickerString", "#ff00ff").Replace("#", string.Empty));
+            }
+            else
+            {
+                
+            }
+            
+            if (GUILayout.Button("Set Crosshair Color", new GUILayoutOption[0]))
+            {
+                PlayerPrefsX.SetColor("CrosshairColor", colorPicker.color);
+            }
+            GUILayout.EndHorizontal();
+            int limit = 7;
+            if (PlayerPrefs.GetString("ColorPickerString", "#ff00ff").StartsWith("#"))
+            {
+                limit = 7;
+            }
+            if (!PlayerPrefs.GetString("ColorPickerString", "#ff00ff").StartsWith("#"))
+            {
+                limit = 6;
+            }
 
+            PlayerPrefs.SetString("ColorPickerString", GUILayout.TextField(PlayerPrefs.GetString("ColorPickerString", "#ff00ff"), limit, new GUILayoutOption[] { GUILayout.Width(IMColorPicker.kHSVPickerSize) }));
+        }
         public void MenuWindow(int wID)
         {
             bool flag = !PlayerPrefsX.GetBool("Open");
@@ -1312,12 +1329,17 @@ namespace Recte_Ravenfield
                     {
                         PlayerPrefs.SetInt("menuWindow", 3);
                     }
-
                     if (
                         GUILayout.Button("Players", new GUILayoutOption[] { GUILayout.Height(35f) })
                     )
                     {
                         PlayerPrefs.SetInt("menuWindow", 4);
+                    }
+                    if (
+                        GUILayout.Button("Colors", new GUILayoutOption[] { GUILayout.Height(35f) })
+                    )
+                    {
+                        PlayerPrefs.SetInt("menuWindow", 5);
                     }
                     GUILayout.EndHorizontal();
 
@@ -1341,6 +1363,10 @@ namespace Recte_Ravenfield
                     {
                         this.playerList();
                     } // Players
+                    if (PlayerPrefs.GetInt("menuWindow") == 5)
+                    {
+                        this.ColorPicker();
+                    }
                     if (GUILayout.Button("Unload Hacks"))
                     {
                         Loader.Unload();

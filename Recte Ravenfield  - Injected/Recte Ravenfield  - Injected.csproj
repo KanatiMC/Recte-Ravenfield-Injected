@@ -251,7 +251,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColorPicker.cs" />
+    <Compile Include="ColorUtil.cs" />
     <Compile Include="Loader.cs" />
+    <Compile Include="Picker.cs" />
     <Compile Include="PlayerPrefsX.cs" />
     <Compile Include="RecteManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

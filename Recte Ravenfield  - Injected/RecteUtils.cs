@@ -152,6 +152,7 @@ namespace Recte_Ravenfield
         // Token: 0x06001BBE RID: 7102 RVA: 0x001070E8 File Offset: 0x001052E8
         public static Color GetColorFromString(string HexCode)
         {
+            
             float num = RecteUtils.HexToFloatNormalized(HexCode.Substring(0, 2));
             float num2 = RecteUtils.HexToFloatNormalized(HexCode.Substring(2, 2));
             float num3 = RecteUtils.HexToFloatNormalized(HexCode.Substring(4, 2));
