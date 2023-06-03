@@ -335,11 +335,13 @@ namespace Recte_Ravenfield
         public void OnGUI()
         {
             
-            GUILayout.Label(ColorUtility.ToHtmlStringRGBA(colorPicker.color));
+            
             
             bool @bool = PlayerPrefsX.GetBool("Open");
             if (@bool)
             {
+                GUI.skin = null;
+                GUI.backgroundColor = (GUI.backgroundColor = PlayerPrefsX.GetColor("GUIColor", Color.white));
                 this.rect1 = GUILayout.Window(
                     1,
                     this.rect1,
@@ -444,10 +446,7 @@ namespace Recte_Ravenfield
                                 {
                                     if (PlayerPrefsX.GetBool("BoxESP"))
                                     {
-                                        /*
-                                        RecteUtils.DrawLine(new Vector2(num5 + num7, num6 - num8 - 45f), new Vector2(num5, num6 - num8 - 45f), Color.black, num9);
-                                        RecteUtils.DrawLine(new Vector2(num5 + num7 * actor.health / 100f, num6 - num8 - 45f), new Vector2(num5, num6 - num8 - 45f), RecteUtils.hpColor(actor.health), 3f);
-                                        */
+                                        
                                         Vector3 pivotPos = actor.transform.position; //Pivot point NOT at the origin, at the center
                                         Vector3 playerFootPos;
                                         playerFootPos.x = pivotPos.x;
@@ -500,7 +499,7 @@ namespace Recte_Ravenfield
                                             (float)Screen.height - w2s_footpos.y - height,
                                             width,
                                             height,
-                                            Color.red,
+                                            PlayerPrefsX.GetColor("BoxESPColor", Color.red),
                                             2f
                                         );
                                     }
@@ -511,7 +510,7 @@ namespace Recte_Ravenfield
                                                 vector.x - 5f,
                                                 (float)Screen.height - vector.y
                                             ),
-                                            $"<b><color=#009666>{actor.name}\nHP: {Mathf.Round(actor.health)}/{actor.maxHealth}\n[{dis}m]</color></b>",
+                                            $"<b><color=#{ColorUtility.ToHtmlStringRGBA(PlayerPrefsX.GetColor("TeamESPColor", RecteUtils.GetColorFromString("009666")))}>{actor.name}\nHP: {Mathf.Round(actor.health)}/{actor.maxHealth}\n[{dis}m]</color></b>",
                                             true
                                         );
                                     }
@@ -522,7 +521,7 @@ namespace Recte_Ravenfield
                                                 vector.x - 5f,
                                                 (float)Screen.height - vector.y
                                             ),
-                                            $"<b><color=#937cf2>{actor.name}\nHP: {Mathf.Round(actor.health)}/{actor.maxHealth}\n[{dis}m]</color></b>",
+                                            $"<b><color=#{ColorUtility.ToHtmlStringRGBA(PlayerPrefsX.GetColor("EnemyESPColor", RecteUtils.GetColorFromString("937cf2")))}>{actor.name}\nHP: {Mathf.Round(actor.health)}/{actor.maxHealth}\n[{dis}m]</color></b>",
                                             true
                                         );
                                     }
@@ -1269,12 +1268,13 @@ namespace Recte_Ravenfield
         }
         public void ColorPicker()
         {
-            GUILayout.BeginHorizontal();
+            
             if (colorPicker != null)
             {
                 colorPicker.DrawColorPicker();
             }
-            if (PlayerPrefs.GetString("ColorPickerString").Replace("#", string.Empty).Length == 6)
+            GUILayout.BeginHorizontal();
+            /*if (PlayerPrefs.GetString("ColorPickerString").Replace("#", string.Empty).Length == 6)
             {
                 if (colorPicker.color != RecteUtils.GetColorFromString(PlayerPrefs.GetString("ColorPickerString").Replace("#", string.Empty)))
                 {
@@ -1282,12 +1282,7 @@ namespace Recte_Ravenfield
                 }
                 PlayerPrefs.SetString("ColorPickerString", ColorUtility.ToHtmlStringRGBA(colorPicker.color));
 
-            }
-            
-            else
-            {
-                
-            }
+            }*/
             if (GUILayout.Button("Set Crosshair Color", new GUILayoutOption[0]))
             {
                 PlayerPrefsX.SetColor("CrosshairColor", colorPicker.color);
@@ -1296,9 +1291,32 @@ namespace Recte_Ravenfield
             {
                 PlayerPrefsX.SetColor("AimbotFOVColor", colorPicker.color);
             }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Set GUI Color", new GUILayoutOption[0]))
+            {
+                PlayerPrefsX.SetColor("GUIColor", colorPicker.color);
+            }
+            if (GUILayout.Button("Set BoxESP Color", new GUILayoutOption[0]))
+            {
+                PlayerPrefsX.SetColor("BoxESPColor", colorPicker.color);
+            }
+
             //AimbotFOVColor
             GUILayout.EndHorizontal();
-            int limit = 7;
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Set TeamESP Color", new GUILayoutOption[0]))
+            {
+                PlayerPrefsX.SetColor("TeamESPColor", colorPicker.color);
+            }
+            if (GUILayout.Button("Set EnemyESP Color", new GUILayoutOption[0]))
+            {
+                PlayerPrefsX.SetColor("EnemyESPColor", colorPicker.color);
+            }
+
+            //AimbotFOVColor
+            GUILayout.EndHorizontal();
+            /*int limit = 7;
             if (PlayerPrefs.GetString("ColorPickerString", "#ff00ff").StartsWith("#"))
             {
                 limit = 7;
@@ -1308,7 +1326,7 @@ namespace Recte_Ravenfield
                 limit = 6;
             }
 
-            PlayerPrefs.SetString("ColorPickerString", GUILayout.TextField(PlayerPrefs.GetString("ColorPickerString", "#ff00ff"), limit, new GUILayoutOption[] { GUILayout.Width(IMColorPicker.kHSVPickerSize) }));
+            PlayerPrefs.SetString("ColorPickerString", GUILayout.TextField(PlayerPrefs.GetString("ColorPickerString", "#ff00ff"), limit, new GUILayoutOption[] { GUILayout.Width(IMColorPicker.kHSVPickerSize) }));*/
         }
         public void MenuWindow(int wID)
         {
@@ -1318,6 +1336,7 @@ namespace Recte_Ravenfield
                 try
                 {
                     GUI.color = Color.white;
+                    
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button("Render", new GUILayoutOption[] { GUILayout.Height(35f) }))
                     {
