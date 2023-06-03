@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
 using MapMagic;
 using UnityEngine;
 using UnityEngine.UIElements;
+
 
 namespace Recte_Ravenfield
 {
@@ -87,48 +89,43 @@ namespace Recte_Ravenfield
                                 )
                             );
                         }
-
                         if (PlayerPrefsX.GetBool("Speed"))
                         {
                             this.player.speedMultiplier = PlayerPrefs.GetFloat("SpeedMultiply");
                         }
                     }
                 }
+            }
+            catch (NullReferenceException) { }
+        }
+        [DllImport("user32.dll")]
+        public static extern void keybd_event(byte virtualKey, byte scanCode, uint flags, IntPtr extraInfo);
+        public void Aimbot2()
+        {
 
-                bool aimbot = PlayerPrefsX.GetBool("Aimbot123123");
-                if (aimbot)
+            if (PlayerPrefsX.GetBool("Aimbot"))
+            {
+
+                if (this.target == null || !this.target.isActiveAndEnabled || this.target.dead)
                 {
-                    bool flag3 =
-                        this.target == null || !this.target.isActiveAndEnabled || this.target.dead;
-                    if (flag3)
+                    this.target = this.GetTarget();
+                }
+                else
+                {
+                    Vector3 vector = this.player.WeaponMuzzlePosition();
+                    RaycastHit raycastHit;
+
+                    if (Physics.Raycast(vector, (this.target.WeaponMuzzlePosition() - vector).normalized, out raycastHit))
                     {
-                        this.target = this.GetTarget();
-                    }
-                    else
-                    {
-                        Vector3 vector = this.player.WeaponMuzzlePosition();
-                        RaycastHit raycastHit;
-                        bool flag4 = Physics.Raycast(
-                            vector,
-                            (this.target.WeaponMuzzlePosition() - vector).normalized,
-                            out raycastHit
-                        );
-                        if (flag4)
+                        Collider[] array = (Collider[])this.target.GetFieldValue("hitboxColliders");
+                        
+                        if (raycastHit.collider != null && Enumerable.Contains<Collider>(array, raycastHit.collider))
                         {
-                            Collider[] array = (Collider[])
-                                this.target.GetFieldValue("hitboxColliders");
-                            bool flag5 =
-                                raycastHit.collider != null && array.Contains(raycastHit.collider);
-                            if (flag5)
+                            
+                            this.player.activeWeapon.transform.LookAt(this.target.Position() + Vector3.up * PlayerPrefs.GetFloat("AimbotOffset"));
+                            if (PlayerPrefsX.GetBool("AutoFire"))
                             {
-                                FpsActorController.instance.fpCamera.transform.LookAt(
-                                    this.target.Position()
-                                        + Vector3.up * PlayerPrefs.GetFloat("AimOffset", .5f)
-                                );
-                            }
-                            else
-                            {
-                                this.target = null;
+                                keybd_event(0x001, 0, 1U, IntPtr.Zero);
                             }
                         }
                         else
@@ -136,11 +133,14 @@ namespace Recte_Ravenfield
                             this.target = null;
                         }
                     }
+                    else
+                    {
+                        this.target = null;
+                    }
                 }
             }
-            catch (NullReferenceException) { }
         }
-
+       
         private void Skeleton()
         {
             foreach (Actor a in ActorManager.instance.actors)
@@ -426,7 +426,7 @@ namespace Recte_Ravenfield
 
                 if (PlayerPrefsX.GetBool("Aimbot"))
                 {
-                    this.Aimbot();
+                    this.Aimbot2();
                 }
                 if (PlayerPrefsX.GetBool("ESP"))
                 {
@@ -536,14 +536,15 @@ namespace Recte_Ravenfield
 
         private bool IsInFieldOfView(Vector2 screenPosition)
         {
-            if (PlayerPrefs.GetFloat("fovSize") <= 0f)
-                return true;
+            {
+                if (PlayerPrefs.GetFloat("fovSize") <= 0f)
+                    return true;
 
-            var distance = Vector2.Distance(RecteUtils.CenterOfScreen(), screenPosition);
-            return distance <= PlayerPrefs.GetFloat("fovSize");
+                var distance = Vector2.Distance(RecteUtils.CenterOfScreen(), screenPosition);
+                return distance <= PlayerPrefs.GetFloat("fovSize");
+            }
         }
 
-        private Camera main = Camera.main;
 
         private GameObject closestObject;
 
@@ -882,6 +883,8 @@ namespace Recte_Ravenfield
 
         private Actor GetTarget()
         {
+            
+            
             int num = ((this.player.team != 0) ? 0 : 1);
             List<Actor> list = new List<Actor>(ActorManager.AliveActorsOnTeam(num));
             list.RemoveAll((Actor actor) => actor.IsSeated() && actor.seat.vehicle.burning);
@@ -892,19 +895,27 @@ namespace Recte_Ravenfield
             Vector3 vector2 = this.player.controller.FacingDirection();
             foreach (Actor actor2 in orderedEnumerable)
             {
+                Vector3 v4 = Camera.main.WorldToScreenPoint(actor2.transform.position);
+                Vector2 v5 = new Vector2(v4.x, v4.y);
+                
                 Collider[] array = (Collider[])actor2.GetFieldValue("hitboxColliders");
                 RaycastHit raycastHit;
-                bool flag = Physics.Raycast(
-                    vector,
-                    (actor2.WeaponMuzzlePosition() - vector).normalized,
-                    out raycastHit
-                );
-                if (flag)
+                if (Physics.Raycast(vector, (actor2.WeaponMuzzlePosition() - vector).normalized, out raycastHit))
                 {
-                    bool flag2 = raycastHit.collider != null && array.Contains(raycastHit.collider);
-                    if (flag2)
+                    if (raycastHit.collider != null && array.Contains(raycastHit.collider))
                     {
-                        return actor2;
+                        if (PlayerPrefsX.GetBool("aimFOV"))
+                        {
+                            if (IsInFieldOfView(v5))
+                            {
+                                return actor2;
+                            }
+                            
+                        }
+                        if (!PlayerPrefsX.GetBool("aimFOV"))
+                        {
+                            return actor2;
+                        }
                     }
                 }
             }
@@ -1146,6 +1157,28 @@ namespace Recte_Ravenfield
                         new GUILayoutOption[0]
                     )
                 );
+                GUILayout.BeginHorizontal();
+                if (
+                    !PlayerPrefsX.GetBool("Autofire")
+                    && GUILayout.Button(
+                        "Autofire: <color=red>Disabled</color>",
+                        new GUILayoutOption[] { GUILayout.Height(35f) }
+                    )
+                )
+                {
+                    PlayerPrefsX.SetBool("Autofire", true);
+                }
+                if (
+                    PlayerPrefsX.GetBool("Autofire")
+                    && GUILayout.Button(
+                        "Autofire: <color=lime>Enabled</color>",
+                        new GUILayoutOption[] { GUILayout.Height(35f) }
+                    )
+                )
+                {
+                    PlayerPrefsX.SetBool("Autofire", false);
+                }
+                GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
                 if (
                     !PlayerPrefsX.GetBool("aimFOV")
