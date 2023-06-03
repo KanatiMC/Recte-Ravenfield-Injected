@@ -335,6 +335,7 @@ namespace Recte_Ravenfield
         public void OnGUI()
         {
             
+            GUILayout.Label(ColorUtility.ToHtmlStringRGBA(colorPicker.color));
             
             bool @bool = PlayerPrefsX.GetBool("Open");
             if (@bool)
@@ -355,7 +356,7 @@ namespace Recte_Ravenfield
                     RecteUtils.DrawCircle(
                         RecteUtils.CenterOfScreen(),
                         PlayerPrefs.GetFloat("fovSize", 10f),
-                        Color.cyan,
+                        PlayerPrefsX.GetColor("AimbotFOVColor", Color.cyan),
                         5,
                         10
                     );
@@ -1273,19 +1274,29 @@ namespace Recte_Ravenfield
             {
                 colorPicker.DrawColorPicker();
             }
-            if (PlayerPrefs.GetString("ColorPickerString").Replace("#", string.Empty).Length == 6 && colorPicker.color != RecteUtils.GetColorFromString(PlayerPrefs.GetString("ColorPickerString").Replace("#", string.Empty)))
+            if (PlayerPrefs.GetString("ColorPickerString").Replace("#", string.Empty).Length == 6)
             {
-                colorPicker.color = RecteUtils.GetColorFromString(PlayerPrefs.GetString("ColorPickerString", "#ff00ff").Replace("#", string.Empty));
+                if (colorPicker.color != RecteUtils.GetColorFromString(PlayerPrefs.GetString("ColorPickerString").Replace("#", string.Empty)))
+                {
+                    colorPicker.color = RecteUtils.GetColorFromString(PlayerPrefs.GetString("ColorPickerString", "#ff00ff").Replace("#", string.Empty));
+                }
+                PlayerPrefs.SetString("ColorPickerString", ColorUtility.ToHtmlStringRGBA(colorPicker.color));
+
             }
+            
             else
             {
                 
             }
-            
             if (GUILayout.Button("Set Crosshair Color", new GUILayoutOption[0]))
             {
                 PlayerPrefsX.SetColor("CrosshairColor", colorPicker.color);
             }
+            if (GUILayout.Button("Set Aimbot Color", new GUILayoutOption[0]))
+            {
+                PlayerPrefsX.SetColor("AimbotFOVColor", colorPicker.color);
+            }
+            //AimbotFOVColor
             GUILayout.EndHorizontal();
             int limit = 7;
             if (PlayerPrefs.GetString("ColorPickerString", "#ff00ff").StartsWith("#"))
