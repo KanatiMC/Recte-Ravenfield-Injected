@@ -98,8 +98,6 @@ namespace Recte_Ravenfield
             }
             catch (NullReferenceException) { }
         }
-        [DllImport("user32.dll")]
-        public static extern void keybd_event(byte virtualKey, byte scanCode, uint flags, IntPtr extraInfo);
         public void Aimbot2()
         {
 
@@ -123,10 +121,7 @@ namespace Recte_Ravenfield
                         {
                             
                             this.player.activeWeapon.transform.LookAt(this.target.Position() + Vector3.up * PlayerPrefs.GetFloat("AimbotOffset"));
-                            if (PlayerPrefsX.GetBool("AutoFire"))
-                            {
-                                keybd_event(0x001, 0, 1U, IntPtr.Zero);
-                            }
+                            
                         }
                         else
                         {
@@ -426,7 +421,10 @@ namespace Recte_Ravenfield
 
                 if (PlayerPrefsX.GetBool("Aimbot"))
                 {
-                    this.Aimbot2();
+                    if (Input.GetKey(KeyCode.Mouse1))
+                    {
+                        this.Aimbot2();
+                    }
                 }
                 if (PlayerPrefsX.GetBool("ESP"))
                 {
@@ -1157,28 +1155,7 @@ namespace Recte_Ravenfield
                         new GUILayoutOption[0]
                     )
                 );
-                GUILayout.BeginHorizontal();
-                if (
-                    !PlayerPrefsX.GetBool("Autofire")
-                    && GUILayout.Button(
-                        "Autofire: <color=red>Disabled</color>",
-                        new GUILayoutOption[] { GUILayout.Height(35f) }
-                    )
-                )
-                {
-                    PlayerPrefsX.SetBool("Autofire", true);
-                }
-                if (
-                    PlayerPrefsX.GetBool("Autofire")
-                    && GUILayout.Button(
-                        "Autofire: <color=lime>Enabled</color>",
-                        new GUILayoutOption[] { GUILayout.Height(35f) }
-                    )
-                )
-                {
-                    PlayerPrefsX.SetBool("Autofire", false);
-                }
-                GUILayout.EndHorizontal();
+                
                 GUILayout.BeginHorizontal();
                 if (
                     !PlayerPrefsX.GetBool("aimFOV")
@@ -1301,7 +1278,6 @@ namespace Recte_Ravenfield
         }
         public void ColorPicker()
         {
-            
             if (colorPicker != null)
             {
                 colorPicker.DrawColorPicker();
